@@ -1,42 +1,52 @@
 import {
   Controller,
-  Get,
   Post,
+  Get,
   Body,
-  Patch,
   Param,
-  Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ClienteService } from './cliente.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
+import { CreatePedidoDto } from '../pedido/dto/create-pedido.dto';
+import { ClienteEntity } from './entities/cliente.entity';
+import { PedidoEntity } from '../pedido/entities/pedido.entity';
 
-@Controller('cliente')
+@Controller('clientes')
 export class ClienteController {
   constructor(private readonly clienteService: ClienteService) {}
 
   @Post()
-  create(@Body() createClienteDto: CreateClienteDto) {
-    return this.clienteService.create(createClienteDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.clienteService.findAll();
+  create(@Body() dto: CreateClienteDto): Promise<ClienteEntity> {
+    return this.clienteService.create(dto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.clienteService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<ClienteEntity> {
+    return this.clienteService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClienteDto: UpdateClienteDto) {
-    return this.clienteService.update(+id, updateClienteDto);
+  @Post(':id/pedidos')
+  createOrder(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreatePedidoDto,
+  ): Promise<PedidoEntity> {
+    return this.clienteService.createOrder(id, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.clienteService.remove(+id);
+  @Get(':id/pedidos')
+  getOrderHistory(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PedidoEntity[]> {
+    return this.clienteService.getOrderHistory(id);
+  }
+
+  @Post(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateClienteDto,
+  ): Promise<ClienteEntity> {
+    return this.clienteService.update(id, dto);
   }
 }

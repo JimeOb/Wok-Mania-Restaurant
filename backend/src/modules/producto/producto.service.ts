@@ -1,26 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductoDto } from './dto/create-producto.dto';
-import { UpdateProductoDto } from './dto/update-producto.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ProductoEntity } from './entities/producto.entity';
 
 @Injectable()
 export class ProductoService {
-  create(createProductoDto: CreateProductoDto) {
-    return 'This action adds a new producto';
-  }
+  constructor(
+    @InjectRepository(ProductoEntity)
+    private readonly prodRepo: Repository<ProductoEntity>,
+  ) {}
 
-  findAll() {
-    return `This action returns all producto`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} producto`;
-  }
-
-  update(id: number, updateProductoDto: UpdateProductoDto) {
-    return `This action updates a #${id} producto`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} producto`;
+  async findOne(id: number): Promise<ProductoEntity> {
+    const p = await this.prodRepo.findOneBy({ id });
+    if (!p) throw new NotFoundException(`Producto ${id} no encontrado`);
+    return p;
   }
 }

@@ -1,26 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRecetaDto } from './dto/create-receta.dto';
-import { UpdateRecetaDto } from './dto/update-receta.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { RecetaEntity } from './entities/receta.entity';
 
 @Injectable()
 export class RecetaService {
-  create(createRecetaDto: CreateRecetaDto) {
-    return 'This action adds a new receta';
-  }
+  constructor(
+    @InjectRepository(RecetaEntity)
+    private readonly recetaRepo: Repository<RecetaEntity>,
+  ) {}
 
-  findAll() {
-    return `This action returns all receta`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} receta`;
-  }
-
-  update(id: number, updateRecetaDto: UpdateRecetaDto) {
-    return `This action updates a #${id} receta`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} receta`;
+  async getItemsByProducto(productoId: number): Promise<RecetaEntity[]> {
+    return this.recetaRepo.find({ where: { productoId } });
   }
 }
