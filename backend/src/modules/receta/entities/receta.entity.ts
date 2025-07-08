@@ -1,10 +1,11 @@
-import { ProductoEntity } from 'src/modules/producto/entities/producto.entity';
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable prettier/prettier */
+import { RecetaItemEntity } from './receta-item.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
-  JoinColumn,
+  OneToMany
 } from 'typeorm';
 
 @Entity('receta')
@@ -12,16 +13,11 @@ export class RecetaEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  // Cada receta pertenece a un único producto
   @Column()
   productoId: number;
 
-  @Column()
-  insumoId: number;
-
-  @Column('decimal')
-  cantidadNecesaria: number;
-
-  @ManyToOne(() => ProductoEntity, (p) => p.recetas, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'productoId' })
-  producto: ProductoEntity;
+  // Una receta tiene múltiples insumos
+  @OneToMany(() => RecetaItemEntity, (item) => item.receta, { cascade: true })
+  items: RecetaItemEntity[];
 }

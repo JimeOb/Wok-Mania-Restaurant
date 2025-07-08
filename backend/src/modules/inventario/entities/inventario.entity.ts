@@ -8,6 +8,6 @@ export class InventarioEntity {
   @Column()
   insumoId: number;
 
-  @Column('decimal')
+  @Column('decimal', { precision: 10, scale: 2 })
   cantidad: number;
 }
