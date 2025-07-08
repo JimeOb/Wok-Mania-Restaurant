@@ -1,35 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import React from 'react';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import LoginPage from './pages/LoginPage';
+import ClienteDashboard from './pages/Cliente/ClienteDashboard';
+import MeseroDashboard from './pages/Mesero/MeseroDashboard';
+import MesasOcupadas from './pages/Mesero/MesasOcupadas';
+import ColaPedidos from './pages/Chef/ColaPedidos';
+import InventarioManager from './pages/Admin/InventarioManager';
+import Reportes from './pages/Admin/Reportes';
+import { useAuth } from './contexts/AuthContext';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+// Protected route wrapper
+function Protected({ children, roles }: { children: React.ReactNode; roles: string[] }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/" replace />;
+  if (!roles.includes(user.rol)) return <Navigate to="/" replace />;
+  return <>{children}</>;
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <HashRouter>
+        <Routes>
+          {/* Root and Login both render the login form */}
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Cliente routes */}
+          <Route
+            path="/cliente"
+            element={
+              <Protected roles={[ 'cliente' ]}>
+                <ClienteDashboard />
+              </Protected>
+            }
+          />
+
+          {/* Mesero routes */}
+          <Route
+            path="/mesero"
+            element={
+              <Protected roles={[ 'mesero' ]}>
+                <>
+                  <MeseroDashboard />
+                  <MesasOcupadas />
+                </>
+              </Protected>
+            }
+          />
+
+          {/* Chef routes */}
+          <Route
+            path="/chef"
+            element={
+              <Protected roles={[ 'chef' ]}>
+                <ColaPedidos />
+              </Protected>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <Protected roles={[ 'administrador' ]}>
+                <>
+                  <InventarioManager />
+                  <Reportes />
+                </>
+              </Protected>
+            }
+          />
+
+          {/* Fallback to login */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </HashRouter>
+    </AuthProvider>
+  );
+}
